@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance - Smart Reliability System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+<script src="{{ url_for('static', filename='js/components.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+<div class="flex h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-800 border-r border-slate-700 flex flex-col">
+        <div id="sidebar-target"></div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-auto">
+
+        <!-- Header -->
+        <header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-50 flex items-center justify-between">
+            <h2 class="text-2xl font-bold">Maintenance Schedule</h2>
+
+            <button onclick="openScheduleModal()"
+                class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Schedule Maintenance
+            </button>
+        </header>
+
+        <section class="p-6 space-y-6">
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                <div class="glass-panel rounded-xl p-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-400 text-sm">Completed This Month</p>
+                        <p class="text-2xl font-bold text-green-400">14</p>
+                    </div>
+                    <div class="p-3 bg-green-500/20 rounded-full">
+                        <i data-lucide="check-circle" class="w-6 h-6 text-green-400"></i>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-xl p-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-400 text-sm">Scheduled</p>
+                        <p class="text-2xl font-bold text-amber-400">8</p>
+                    </div>
+                    <div class="p-3 bg-amber-500/20 rounded-full">
+                        <i data-lucide="calendar" class="w-6 h-6 text-amber-400"></i>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-xl p-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-400 text-sm">Overdue</p>
+                        <p class="text-2xl font-bold text-red-400">2</p>
+                    </div>
+                    <div class="p-3 bg-red-500/20 rounded-full">
+                        <i data-lucide="alert-circle" class="w-6 h-6 text-red-400"></i>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Maintenance Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Maintenance List -->
+                <div class="glass-panel rounded-xl p-6">
+                    <h3 class="flex items-center gap-2 text-lg font-semibold mb-4">
+                        <i data-lucide="list" class="w-5 h-5 text-blue-400"></i>
+                        Upcoming & Recent
+                    </h3>
+
+                    <div id="maintenance-list"
+                        class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                    </div>
+                </div>
+
+                <!-- Calendar -->
+                <div class="glass-panel rounded-xl p-6 lg:col-span-2">
+
+                    <h3 class="flex items-center gap-2 text-lg font-semibold mb-4">
+                        <i data-lucide="calendar" class="w-5 h-5 text-purple-400"></i>
+                        Schedule Overview
+                    </h3>
+
+                    <!-- Weekdays -->
+                    <div class="grid grid-cols-7 gap-2 text-center text-sm font-medium text-slate-400 mb-2">
+                        <div>Sun</div>
+                        <div>Mon</div>
+                        <div>Tue</div>
+                        <div>Wed</div>
+                        <div>Thu</div>
+                        <div>Fri</div>
+                        <div>Sat</div>
+                    </div>
+
+                    <!-- Calendar Grid -->
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-2"></div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+</div>
+
+
+<!-- Schedule Modal -->
+<div id="schedule-modal"
+    class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+
+    <div class="glass-panel rounded-xl p-6 w-full max-w-md">
+
+        <h3 class="text-xl font-bold mb-4">Schedule Maintenance</h3>
+
+        <form id="maintenance-form" class="space-y-4">
+
+            <div>
+                <label class="block text-sm text-slate-400 mb-1">Equipment ID</label>
+                <select id="maint-equip-id"
+                    class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white">
+                    <option value="PUMP-001">PUMP-001 - Main Cooling Pump</option>
+                    <option value="COMP-001">COMP-001 - Air Compressor</option>
+                    <option value="MOTOR-001">MOTOR-001 - Conveyor Motor</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm text-slate-400 mb-1">Date</label>
+                <input type="date" id="maint-date"
+                    class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white" required>
+            </div>
+
+            <div>
+                <label class="block text-sm text-slate-400 mb-1">Type</label>
+                <select id="maint-type"
+                    class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white">
+                    <option value="Routine Service">Routine Service</option>
+                    <option value="Inspection">Inspection</option>
+                    <option value="Repair">Repair</option>
+                </select>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeScheduleModal()"
+                    class="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg">
+                    Cancel
+                </button>
+
+                <button type="submit"
+                    class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg">
+                    Schedule
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+<script>
+const maintenanceList = document.getElementById('maintenance-list');
+const calendarGrid = document.getElementById('calendar-grid');
+const modal = document.getElementById('schedule-modal');
+const form = document.getElementById('maintenance-form');
+
+const equipInput = document.getElementById('maint-equip-id');
+const dateInput = document.getElementById('maint-date');
+const typeInput = document.getElementById('maint-type');
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const payload = {
+        equipment_id: equipInput.value,
+        date: dateInput.value,
+        type: typeInput.value
+    };
+
+    try {
+        const response = await fetch('/api/schedule', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error("Failed request");
+
+        alert('Maintenance saved to CSV successfully!');
+        closeScheduleModal();
+        loadMaintenanceData();
+
+    } catch (error) {
+        console.error(error);
+        alert('Error connecting to server.');
+    }
+});
+
+function getMaintenanceType(type){
+
+const t = type.toLowerCase();
+
+if(t.includes('repair')) return {
+badge:'type-repair',
+border:'border-repair'
+};
+
+if(t.includes('inspection')) return {
+badge:'type-inspection',
+border:'border-inspection'
+};
+
+if(t.includes('routine')) return {
+badge:'type-routine',
+border:'border-routine'
+};
+
+return {
+badge:'',
+border:''
+};
+
+}
+
+async function loadMaintenanceData() {
+
+    try {
+        const response = await fetch('/api/maintenance');
+        const data = await response.json();
+
+        if (!Array.isArray(data)) return;
+
+        let html = '';
+
+        for (const item of data) {
+
+const typeStyle = getMaintenanceType(item.type);
+
+html += `
+<div class="maintenance-item p-3 bg-slate-800/50 rounded-lg border-l-4 ${typeStyle.border}">
+    <div class="flex justify-between items-start">
+        <div>
+            <p class="font-medium text-white text-sm">${item.equipment}</p>
+            <p class="text-xs text-slate-400 mt-1">${item.date}</p>
+        </div>
+        <span class="px-2 py-1 rounded text-xs ${typeStyle.badge}">
+            ${item.type}
+        </span>
+    </div>
+    ${item.duration ? `<p class="text-xs text-slate-500 mt-2">Duration: ${item.duration} hrs</p>` : ''}
+</div>
+`;}
+
+        maintenanceList.innerHTML = html;
+
+        generateCalendar();
+
+    } catch (error) {
+        console.error("Maintenance Load Error:", error);
+    }
+}
+
+function generateCalendar() {
+
+    const daysInMonth = 30;
+    const startOffset = 1;
+
+    let html = '';
+
+    for (let i = 0; i < startOffset; i++) {
+        html += `<div></div>`;
+    }
+
+    const maintenanceDays = new Set([2,5,12,15,18,22,25,28]);
+
+    for (let day = 1; day <= daysInMonth; day++) {
+
+        const hasMaint = maintenanceDays.has(day);
+
+        html += `
+        <div class="calendar-day rounded-lg p-2 relative">
+            <span class="text-sm ${hasMaint ? 'text-blue-400 font-bold' : 'text-slate-400'}">${day}</span>
+            ${hasMaint ? '<div class="mt-1 w-full h-2 bg-blue-500/50 rounded-full"></div>' : ''}
+            ${hasMaint ? '<div class="absolute top-2 right-2 w-2 h-2 bg-blue-400 rounded-full"></div>' : ''}
+        </div>
+        `;
+    }
+
+    calendarGrid.innerHTML = html;
+}
+
+function openScheduleModal() {
+    modal.classList.remove('hidden');
+}
+
+function closeScheduleModal() {
+    modal.classList.add('hidden');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    loadMaintenanceData();
+
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+
+});
+</script>
+</body>
+</html>

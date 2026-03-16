@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analysis - Smart Reliability System</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="{{ url_for('static', filename='js/components.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="bg-slate-900 text-white min-h-screen">
+
+<div class="flex h-screen">
+
+<!-- Sidebar -->
+<aside class="w-64 bg-slate-800 border-r border-slate-700 flex flex-col">
+<div id="sidebar-target"></div>
+</aside>
+
+<!-- Main -->
+<main class="flex-1 overflow-auto">
+
+<header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-50 flex items-center justify-between">
+<h2 class="text-2xl font-bold">Failure Analysis</h2>
+
+<button onclick="loadAnalysisData()"
+class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2">
+<i data-lucide="refresh-cw" class="w-4 h-4"></i>
+Refresh
+</button>
+</header>
+
+
+<div class="p-6 space-y-6">
+
+<!-- Summary -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+<div class="glass-panel rounded-xl p-4">
+<p class="text-slate-400 text-sm mb-1">Most Common Failure</p>
+<p id="top-failure" class="text-xl font-bold text-red-400">--</p>
+<p class="text-xs text-slate-500 mt-1">By frequency</p>
+</div>
+
+<div class="glass-panel rounded-xl p-4">
+<p class="text-slate-400 text-sm mb-1">Most Costly</p>
+<p id="costly-failure" class="text-xl font-bold text-amber-400">--</p>
+<p class="text-xs text-slate-500 mt-1">By downtime</p>
+</div>
+
+<div class="glass-panel rounded-xl p-4">
+<p class="text-slate-400 text-sm mb-1">Avg Repair Time</p>
+<p id="avg-repair" class="text-xl font-bold text-blue-400">-- hrs</p>
+</div>
+
+<div class="glass-panel rounded-xl p-4">
+<p class="text-slate-400 text-sm mb-1">Total Failure Types</p>
+<p id="failure-types" class="text-xl font-bold">--</p>
+</div>
+
+</div>
+
+
+<!-- Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+<div class="glass-panel rounded-xl p-6">
+<h3 class="flex items-center gap-2 text-lg font-semibold mb-4">
+<i data-lucide="pie-chart" class="w-5 h-5 text-purple-400"></i>
+Failure Distribution
+</h3>
+<div class="relative h-64">
+<canvas id="distributionChart"></canvas>
+</div>
+</div>
+
+<div class="glass-panel rounded-xl p-6">
+<h3 class="flex items-center gap-2 text-lg font-semibold mb-4">
+<i data-lucide="clock" class="w-5 h-5 text-green-400"></i>
+Downtime by Type
+</h3>
+<div class="relative h-64">
+<canvas id="downtimeChart"></canvas>
+</div>
+</div>
+
+</div>
+
+
+<!-- Table -->
+<div class="glass-panel rounded-xl p-6">
+
+<h3 class="flex items-center gap-2 text-lg font-semibold mb-4">
+<i data-lucide="list" class="w-5 h-5 text-blue-400"></i>
+Detailed Failure Analysis
+</h3>
+
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+
+<thead class="bg-slate-800 text-slate-300">
+<tr>
+<th class="p-3 rounded-tl-lg">Failure Type</th>
+<th class="p-3">Occurrences</th>
+<th class="p-3">Total Downtime</th>
+<th class="p-3">Avg Repair Time</th>
+<th class="p-3 rounded-tr-lg">Impact Score</th>
+</tr>
+</thead>
+
+<tbody id="analysis-table-body"
+class="divide-y divide-slate-700">
+</tbody>
+
+</table>
+</div>
+</div>
+
+</div>
+</main>
+</div>
+
+
+<script>
+
+let distributionChart;
+let downtimeChart;
+
+/* Cache DOM */
+
+const topFailure = document.getElementById("top-failure");
+const costlyFailure = document.getElementById("costly-failure");
+const avgRepair = document.getElementById("avg-repair");
+const failureTypes = document.getElementById("failure-types");
+const tableBody = document.getElementById("analysis-table-body");
+
+const distributionCtx =
+document.getElementById("distributionChart").getContext("2d");
+
+const downtimeCtx =
+document.getElementById("downtimeChart").getContext("2d");
+
+
+/* Load Analysis */
+
+async function loadAnalysisData(){
+
+try{
+
+const response = await fetch("/api/failure_analysis");
+
+if(!response.ok) throw new Error("API error");
+
+const data = await response.json();
+
+if(!Array.isArray(data) || data.length===0) return;
+
+/* Summary */
+
+const format = t => t.replace(/_/g," ");
+
+topFailure.textContent = format(data[0].type);
+
+failureTypes.textContent = data.length;
+
+const costly =
+data.reduce((a,b)=>
+a.total_downtime>b.total_downtime?a:b);
+
+costlyFailure.textContent = format(costly.type);
+
+const avg =
+data.reduce((s,i)=>s+i.avg_repair_time,0)/data.length;
+
+avgRepair.textContent = avg.toFixed(1)+" hrs";
+
+
+/* Charts */
+
+updateDistributionChart(data);
+updateDowntimeChart(data);
+
+
+/* Table */
+
+let html="";
+
+for(const item of data){
+
+const impact = (item.count*item.total_downtime)/10;
+const width = Math.min(100,impact*5);
+
+html+=`
+<tr class="hover:bg-slate-800/50 transition-colors">
+
+<td class="p-3 font-medium capitalize">
+${format(item.type)}
+</td>
+
+<td class="p-3">
+<span class="px-3 py-1 rounded-full bg-red-500/20 text-red-400 text-sm">
+${item.count}
+</span>
+</td>
+
+<td class="p-3">${item.total_downtime} hrs</td>
+
+<td class="p-3">${item.avg_repair_time} hrs</td>
+
+<td class="p-3">
+
+<div class="flex items-center gap-2">
+
+<div class="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
+
+<div class="h-full bg-gradient-to-r from-green-400 to-red-400"
+style="width:${width}%"></div>
+
+</div>
+
+<span class="text-xs w-8">${Math.floor(impact)}</span>
+
+</div>
+
+</td>
+
+</tr>
+`;
+
+}
+
+tableBody.innerHTML = html;
+
+}catch(err){
+
+console.error("Analysis load error:",err);
+
+}
+
+}
+
+
+/* Distribution Chart */
+
+function updateDistributionChart(data){
+
+const labels = data.map(d=>d.type.replace(/_/g," "));
+const values = data.map(d=>d.count);
+
+if(distributionChart) distributionChart.destroy();
+
+distributionChart = new Chart(distributionCtx,{
+type:"doughnut",
+data:{
+labels,
+datasets:[{
+data:values,
+backgroundColor:[
+"rgba(239,68,68,.8)",
+"rgba(245,158,11,.8)",
+"rgba(59,130,246,.8)",
+"rgba(16,185,129,.8)",
+"rgba(139,92,246,.8)",
+"rgba(236,72,153,.8)"
+],
+borderWidth:0
+}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{
+legend:{
+position:"right",
+labels:{
+color:"#94a3b8",
+font:{size:11}
+}
+}
+}
+}
+});
+
+}
+
+
+/* Downtime Chart */
+
+function updateDowntimeChart(data){
+
+const labels =
+data.map(d=>d.type.replace(/_/g," ").substring(0,8));
+
+const values = data.map(d=>d.total_downtime);
+
+if(downtimeChart) downtimeChart.destroy();
+
+downtimeChart = new Chart(downtimeCtx,{
+type:"bar",
+data:{
+labels,
+datasets:[{
+data:values,
+backgroundColor:"rgba(16,185,129,.8)",
+borderRadius:4
+}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{legend:{display:false}},
+scales:{
+x:{
+grid:{display:false},
+ticks:{color:"#64748b",font:{size:10}}
+},
+y:{
+grid:{color:"rgba(255,255,255,.05)"},
+ticks:{color:"#64748b",font:{size:10}}
+}
+}
+}
+});
+
+}
+
+
+/* Init */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+loadAnalysisData();
+
+if(window.lucide) lucide.createIcons();
+
+});
+
+</script>
+
+</body>
+</html>

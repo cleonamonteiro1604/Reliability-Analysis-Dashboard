@@ -1,0 +1,49 @@
+date,equipment_id,equipment_name,event_type,failure_type,downtime_hours,status
+2024-01-01 08:00,PUMP-001,Main Cooling Pump,normal,none,0,operational
+2024-01-02 14:30,PUMP-001,Main Cooling Pump,failure,bearing_failure,4.5,critical
+2024-01-02 19:00,PUMP-001,Main Cooling Pump,repair,none,0,maintenance
+2024-01-03 08:00,PUMP-001,Main Cooling Pump,normal,none,0,operational
+2024-01-04 10:15,COMP-001,Air Compressor,failure,overheating,2.0,critical
+2024-01-04 12:15,COMP-001,Air Compressor,repair,none,0,maintenance
+2024-01-05 08:00,COMP-001,Air Compressor,normal,none,0,operational
+2024-01-05 09:30,MOTOR-001,Conveyor Motor,failure,electrical_fault,6.0,critical
+2024-01-05 15:30,MOTOR-001,Conveyor Motor,repair,none,0,maintenance
+2024-01-06 08:00,MOTOR-001,Conveyor Motor,normal,none,0,operational
+2024-01-07 11:20,PUMP-002,Secondary Pump,failure,seal_leak,3.5,critical
+2024-01-07 14:50,PUMP-002,Secondary Pump,repair,none,0,maintenance
+2024-01-08 08:00,PUMP-002,Secondary Pump,normal,none,0,operational
+2024-01-09 16:45,GEN-001,Backup Generator,failure,battery_issue,1.5,critical
+2024-01-09 18:15,GEN-001,Backup Generator,repair,none,0,maintenance
+2024-01-10 08:00,GEN-001,Backup Generator,normal,none,0,operational
+2024-01-11 13:00,COMP-001,Air Compressor,failure,pressure_loss,2.5,critical
+2024-01-11 15:30,COMP-001,Air Compressor,repair,none,0,maintenance
+2024-01-12 08:00,COMP-001,Air Compressor,normal,none,0,operational
+2024-01-13 10:00,PUMP-001,Main Cooling Pump,failure,vibration_high,5.0,critical
+2024-01-13 15:00,PUMP-001,Main Cooling Pump,repair,none,0,maintenance
+2024-01-14 08:00,PUMP-001,Main Cooling Pump,normal,none,0,operational
+2024-01-15 09:15,MOTOR-002,Fan Motor,failure,bearing_wear,3.0,critical
+2024-01-15 12:15,MOTOR-002,Fan Motor,repair,none,0,maintenance
+2024-01-16 08:00,MOTOR-002,Fan Motor,normal,none,0,operational
+2024-01-17 14:20,PUMP-003,Circulation Pump,failure,cavitation,4.0,critical
+2024-01-17 18:20,PUMP-003,Circulation Pump,repair,none,0,maintenance
+2024-01-18 08:00,PUMP-003,Circulation Pump,normal,none,0,operational
+2024-01-19 11:30,VALVE-001,Control Valve,failure,actuator_fail,2.0,critical
+2024-01-19 13:30,VALVE-001,Control Valve,repair,none,0,maintenance
+2024-01-20 08:00,VALVE-001,Control Valve,normal,none,0,operational
+2024-01-21 08:00,COMP-002,Industrial Fan,normal,none,0,operational
+2024-01-22 15:00,COMP-002,Industrial Fan,failure,belt_break,1.5,critical
+2024-01-22 16:30,COMP-002,Industrial Fan,repair,none,0,maintenance
+2024-01-23 08:00,COMP-002,Industrial Fan,normal,none,0,operational
+2024-01-24 10:30,GEN-002,UPS System,failure,capacitor_fail,3.0,critical
+2024-01-24 13:30,GEN-002,UPS System,repair,none,0,maintenance
+2024-01-25 08:00,GEN-002,UPS System,normal,none,0,operational
+2024-01-26 12:00,PUMP-001,Main Cooling Pump,failure,seal_wear,4.0,critical
+2024-01-26 16:00,PUMP-001,Main Cooling Pump,repair,none,0,maintenance
+2024-01-27 08:00,PUMP-001,Main Cooling Pump,normal,none,0,operational
+2024-01-28 09:45,MOTOR-001,Conveyor Motor,failure,overheating,2.5,critical
+2024-01-28 12:15,MOTOR-001,Conveyor Motor,repair,none,0,maintenance
+2024-01-29 08:00,MOTOR-001,Conveyor Motor,normal,none,0,operational
+2024-01-30 11:00,VALVE-002,Safety Valve,failure,stuck_open,1.0,critical
+2024-01-30 12:00,VALVE-002,Safety Valve,repair,none,0,maintenance
+2026-03-19 22:50,COMP-001,Air Compressor,repair,Routine Service,0,maintenance
+2026-03-12 22:53,MOTOR-001,Conveyor Motor,repair,Inspection,0,maintenance

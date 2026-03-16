@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment - Smart Reliability System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="{{ url_for('static', filename='js/components.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-slate-800 border-r border-slate-700 flex flex-col">
+<div id="sidebar-target"></div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-auto">
+            <header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-50">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-white">Equipment Management</h2>
+                    <div class="flex gap-3">
+                        <div class="flex items-center gap-2 px-3 py-1 bg-slate-700 rounded-lg">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+                            <input type="text" id="search-equipment" placeholder="Search equipment..." 
+                                   class="bg-transparent border-none outline-none text-sm text-white placeholder-slate-400">
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="p-6 space-y-6">
+                <!-- Equipment Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass-panel rounded-xl p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-400 text-sm">Total Equipment</p>
+                                <p id="total-equipment" class="text-2xl font-bold text-white">--</p>
+                            </div>
+                            <div class="p-3 bg-blue-500/20 rounded-full">
+                                <i data-lucide="package" class="w-6 h-6 text-blue-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-panel rounded-xl p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-400 text-sm">Operational</p>
+                                <p id="operational-count" class="text-2xl font-bold text-green-400">--</p>
+                            </div>
+                            <div class="p-3 bg-green-500/20 rounded-full">
+                                <i data-lucide="check-circle" class="w-6 h-6 text-green-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-panel rounded-xl p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-400 text-sm">Critical Status</p>
+                                <p id="critical-count" class="text-2xl font-bold text-red-400">--</p>
+                            </div>
+                            <div class="p-3 bg-red-500/20 rounded-full">
+                                <i data-lucide="alert-circle" class="w-6 h-6 text-red-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Equipment Table -->
+                <div class="glass-panel rounded-xl p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-white">All Equipment</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-800 text-slate-300">
+                                <tr>
+                                    <th class="p-3 rounded-tl-lg">ID</th>
+                                    <th class="p-3">Equipment Name</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3">Failures</th>
+                                    <th class="p-3">Total Downtime</th>
+                                    <th class="p-3">Last Updated</th>
+                                    <th class="p-3 rounded-tr-lg">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="equipment-full-table" class="divide-y divide-slate-700">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Equipment Detail Modal -->
+                <div id="equipment-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+                    <div class="glass-panel rounded-xl p-6 w-full max-w-3xl max-h-[80vh] overflow-auto">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold" id="modal-title">Equipment Details</h3>
+                            <button onclick="closeModal()" class="p-2 hover:bg-slate-700 rounded-lg">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <div id="modal-content">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let allEquipment = [];
+        
+        async function loadEquipmentData() {
+            try {
+                const response = await fetch('/api/equipment');
+                const data = await response.json();
+                allEquipment = data;
+                
+                document.getElementById('total-equipment').textContent = data.length;
+                document.getElementById('operational-count').textContent = 
+                    data.filter(e => e.status === 'operational').length;
+                document.getElementById('critical-count').textContent = 
+                    data.filter(e => e.status === 'critical').length;
+                
+                renderTable(data);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        function renderTable(data) {
+            const tbody = document.getElementById('equipment-full-table');
+            tbody.innerHTML = '';
+            
+            data.forEach(item => {
+                const statusColors = {
+                    'operational': 'bg-green-500/20 text-green-400',
+                    'critical': 'bg-red-500/20 text-red-400',
+                    'maintenance': 'bg-amber-500/20 text-amber-400'
+                };
+                
+                const row = `
+                    <tr class="hover:bg-slate-800/50 transition-colors">
+                        <td class="p-3 font-mono text-blue-400">${item.id}</td>
+                        <td class="p-3 font-medium">${item.name}</td>
+                        <td class="p-3">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium ${statusColors[item.status] || 'bg-slate-500/20'}">
+                                ${item.status.toUpperCase()}
+                            </span>
+                        </td>
+                        <td class="p-3 text-center">${item.failure_count}</td>
+                        <td class="p-3">${item.total_downtime} hrs</td>
+                        <td class="p-3 text-slate-400 text-sm">${item.last_updated}</td>
+                        <td class="p-3">
+                            <button onclick="viewDetails('${item.id}')" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm transition-colors">
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+        
+        async function viewDetails(equipmentId) {
+            try {
+                const response = await fetch(`/api/equipment/${equipmentId}`);
+                const data = await response.json();
+                
+                document.getElementById('modal-title').textContent = `${data.name} (${data.id})`;
+                
+                let historyHtml = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-slate-800 p-4 rounded-lg">
+                            <p class="text-slate-400 text-sm">Current Status</p>
+                            <p class="text-xl font-bold capitalize ${data.status === 'operational' ? 'text-green-400' : 'text-red-400'}">${data.status}</p>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded-lg">
+                            <p class="text-slate-400 text-sm">Total Failures</p>
+                            <p class="text-xl font-bold text-white">${data.total_failures}</p>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded-lg">
+                            <p class="text-slate-400 text-sm">Total Downtime</p>
+                            <p class="text-xl font-bold text-white">${data.total_downtime} hours</p>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded-lg">
+                            <p class="text-slate-400 text-sm">Uptime Score</p>
+                            <p class="text-xl font-bold text-blue-400">${data.total_failures === 0 ? '100%' : Math.max(0, 100 - (data.total_downtime * 2)).toFixed(1) + '%'}</p>
+                        </div>
+                    </div>
+                    
+                    <h4 class="font-semibold mb-3 text-white">Event History</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-slate-800 text-slate-300">
+                                <tr>
+                                    <th class="p-2 text-left">Date</th>
+                                    <th class="p-2 text-left">Event</th>
+                                    <th class="p-2 text-left">Type</th>
+                                    <th class="p-2 text-left">Downtime</th>
+                                    <th class="p-2 text-left">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                data.history.forEach(h => {
+                    const eventColor = h.event === 'failure' ? 'text-red-400' : 
+                                     h.event === 'repair' ? 'text-amber-400' : 'text-green-400';
+                    historyHtml += `
+                        <tr class="border-b border-slate-700">
+                            <td class="p-2 text-slate-300">${h.date}</td>
+                            <td class="p-2 capitalize ${eventColor}">${h.event}</td>
+                            <td class="p-2 text-slate-400">${h.failure_type}</td>
+                            <td class="p-2 text-slate-300">${h.downtime > 0 ? h.downtime + ' hrs' : '-'}</td>
+                            <td class="p-2 capitalize text-slate-300">${h.status}</td>
+                        </tr>
+                    `;
+                });
+                
+                historyHtml += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                
+                document.getElementById('modal-content').innerHTML = historyHtml;
+                document.getElementById('equipment-modal').classList.remove('hidden');
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        function closeModal() {
+            document.getElementById('equipment-modal').classList.add('hidden');
+        }
+        
+        document.getElementById('search-equipment').addEventListener('input', (e) => {
+            const search = e.target.value.toLowerCase();
+            const filtered = allEquipment.filter(item => 
+                item.name.toLowerCase().includes(search) || 
+                item.id.toLowerCase().includes(search)
+            );
+            renderTable(filtered);
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEquipmentData();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

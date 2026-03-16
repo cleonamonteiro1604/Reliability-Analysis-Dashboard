@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard - Smart Reliability System</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<script src="{{ url_for('static', filename='js/components.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="bg-slate-900 text-white min-h-screen">
+
+<div class="flex h-screen">
+
+<!-- Sidebar -->
+<aside class="w-64 bg-slate-800 border-r border-slate-700">
+<div id="sidebar-target"></div>
+</aside>
+
+<!-- Main -->
+<main class="flex-1 overflow-auto">
+
+<!-- Header -->
+<header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-50">
+<div class="flex justify-between items-center">
+
+<h2 class="text-2xl font-bold">Dashboard Overview</h2>
+
+<div class="flex items-center gap-4">
+
+<div class="text-right">
+<p class="text-xs text-slate-400">Last Updated</p>
+<p id="last-updated" class="text-sm font-mono">--:--:--</p>
+</div>
+
+<button onclick="refreshData()" class="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg">
+<i data-lucide="refresh-cw" class="w-5 h-5"></i>
+</button>
+
+</div>
+</div>
+</header>
+
+
+<!-- Content -->
+<div class="p-6 space-y-6">
+
+<!-- Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+<div class="glass-panel metric-card rounded-xl p-4">
+<div class="flex justify-between mb-2">
+<span class="text-slate-400 text-sm">MTBF</span>
+<i data-lucide="clock" class="w-5 h-5 text-blue-400"></i>
+</div>
+<p id="mtbf-value" class="text-3xl font-bold">--</p>
+<p class="text-xs text-slate-400 mt-1">Mean Time Between Failures (hrs)</p>
+</div>
+
+<div class="glass-panel metric-card rounded-xl p-4">
+<div class="flex justify-between mb-2">
+<span class="text-slate-400 text-sm">MTTR</span>
+<i data-lucide="wrench" class="w-5 h-5 text-purple-400"></i>
+</div>
+<p id="mttr-value" class="text-3xl font-bold">--</p>
+<p class="text-xs text-slate-400 mt-1">Mean Time To Repair (hrs)</p>
+</div>
+
+<div class="glass-panel metric-card rounded-xl p-4">
+<div class="flex justify-between mb-2">
+<span class="text-slate-400 text-sm">Availability</span>
+<i data-lucide="gauge" class="w-5 h-5 text-green-400"></i>
+</div>
+<p id="availability-value" class="text-3xl font-bold text-green-400">--%</p>
+<p class="text-xs text-slate-400 mt-1">System Uptime Percentage</p>
+</div>
+
+<div class="glass-panel metric-card rounded-xl p-4">
+<div class="flex justify-between mb-2">
+<span class="text-slate-400 text-sm">Active Alerts</span>
+<i data-lucide="alert-triangle" class="w-5 h-5 text-red-400"></i>
+</div>
+<p id="alerts-value" class="text-3xl font-bold text-red-400">--</p>
+<p class="text-xs text-slate-400 mt-1">Critical Issues</p>
+</div>
+
+</div>
+
+
+<!-- Tables + Alerts -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+<!-- Equipment -->
+<div class="glass-panel rounded-xl p-6">
+
+<div class="flex justify-between mb-4">
+
+<h3 class="flex items-center gap-2 text-lg font-semibold">
+<i data-lucide="list" class="w-5 h-5 text-blue-400"></i>
+Equipment Status
+</h3>
+
+<a href="/equipment" class="text-sm text-blue-400 hover:text-blue-300">
+View All →
+</a>
+
+</div>
+
+<div class="overflow-x-auto">
+
+<table class="w-full text-left">
+
+<thead class="bg-slate-800 text-slate-300">
+<tr>
+<th class="p-3 rounded-tl-lg">Equipment ID</th>
+<th class="p-3">Name</th>
+<th class="p-3">Status</th>
+<th class="p-3 rounded-tr-lg">Last Failure</th>
+</tr>
+</thead>
+
+<tbody id="equipment-table-body" class="divide-y divide-slate-700"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- Alerts -->
+<div class="glass-panel rounded-xl p-6">
+
+<div class="flex justify-between mb-4">
+
+<h3 class="flex items-center gap-2 text-lg font-semibold">
+<i data-lucide="bell" class="w-5 h-5 text-red-400"></i>
+Recent Alerts
+</h3>
+
+<a href="/analysis" class="text-sm text-blue-400 hover:text-blue-300">
+View Details →
+</a>
+
+</div>
+
+<div id="alerts-container" class="space-y-3 max-h-80 overflow-y-auto"></div>
+
+</div>
+
+</div>
+
+</div>
+
+</main>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+<script>
+lucide.createIcons()
+</script>
+
+</body>
+</html>
