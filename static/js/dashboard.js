@@ -1,5 +1,5 @@
 /* ---------- DOM CACHE ---------- */
-
+/* Store references to important HTML elements */
 const lastUpdated = document.getElementById('last-updated');
 
 const mtbfValue = document.getElementById('mtbf-value');
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(refreshData, 30000);
 });
 
-
+// Loads all dashboard sections
 function initDashboard() {
     loadMetrics();
     loadEquipment();
@@ -29,6 +29,7 @@ function initDashboard() {
 
 /* ---------- REFRESH ---------- */
 
+// Reload all data from APIs
 function refreshData() {
 
     Promise.all([
@@ -42,6 +43,7 @@ function refreshData() {
 
 /* ---------- TIME ---------- */
 
+// Display the last update time
 function updateTimestamp() {
     if (lastUpdated) {
         lastUpdated.textContent = new Date().toLocaleTimeString();
@@ -50,7 +52,7 @@ function updateTimestamp() {
 
 
 /* ---------- FETCH HELPER ---------- */
-
+// Generic helper to call APIs and return JSON
 async function fetchJSON(url) {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`API error: ${url}`);
@@ -59,7 +61,7 @@ async function fetchJSON(url) {
 
 
 /* ---------- METRICS ---------- */
-
+// Fetch system metrics from backend
 async function loadMetrics() {
 
     try {
@@ -79,7 +81,7 @@ async function loadMetrics() {
 
 
 /* ---------- EQUIPMENT ---------- */
-
+// Fetch equipment data and build table rows
 async function loadEquipment() {
 
     try {
@@ -110,7 +112,7 @@ async function loadEquipment() {
             </tr>
             `;
         }
-
+        // Inject generated rows into the table
         equipmentTableBody.innerHTML = html;
 
     } catch (error) {
@@ -119,7 +121,7 @@ async function loadEquipment() {
 
 }
 
-
+// Returns Tailwind CSS color classes based on equipment status
 function getStatusClass(status) {
 
     switch (status.toLowerCase()) {
@@ -142,7 +144,7 @@ function getStatusClass(status) {
 
 
 /* ---------- ALERTS ---------- */
-
+// Fetch system alerts
 async function loadAlerts() {
 
     try {

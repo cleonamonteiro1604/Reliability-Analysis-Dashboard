@@ -176,7 +176,7 @@ const form = document.getElementById('maintenance-form');
 const equipInput = document.getElementById('maint-equip-id');
 const dateInput = document.getElementById('maint-date');
 const typeInput = document.getElementById('maint-type');
-
+// Handles form submission and sends maintenance schedule data to backend API
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -204,7 +204,7 @@ form.addEventListener('submit', async (e) => {
         alert('Error connecting to server.');
     }
 });
-
+// Determines UI styling for each maintenance type (repair, inspection, routine)
 function getMaintenanceType(type){
 
 const t = type.toLowerCase();
@@ -230,7 +230,7 @@ border:''
 };
 
 }
-
+// Fetches maintenance data from backend and renders it in the maintenance list
 async function loadMaintenanceData() {
 
     try {
@@ -268,7 +268,7 @@ html += `
         console.error("Maintenance Load Error:", error);
     }
 }
-
+// Generates the monthly calendar view and highlights days with scheduled maintenance
 function generateCalendar() {
 
     const daysInMonth = 30;
@@ -305,7 +305,7 @@ function openScheduleModal() {
 function closeScheduleModal() {
     modal.classList.add('hidden');
 }
-
+// Initializes page data and icons once the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
 
     loadMaintenanceData();

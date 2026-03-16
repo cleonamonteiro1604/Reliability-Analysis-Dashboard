@@ -6,9 +6,7 @@ from datetime import datetime
 from functools import lru_cache
 app = Flask(__name__)
 
-# Load and process CSV data
-
-
+# Loads reliability CSV data and caches it to avoid re-reading the file on every API call
 @lru_cache(maxsize=1)
 def load_reliability_data():
     try:
@@ -19,6 +17,7 @@ def load_reliability_data():
         print(f"Error loading CSV: {e}")
         return pd.DataFrame()
 
+# Calculates reliability KPIs like MTBF, MTTR, availability, failures, etc.
 def calculate_metrics(df):
     if df.empty:
         return {}
@@ -49,6 +48,7 @@ def calculate_metrics(df):
         'failure_count': total_failures
     }
 
+# Aggregates equipment-level status and failure summary for dashboard display
 def get_equipment_status(df):
     if df is None:
         return []
@@ -85,16 +85,7 @@ def get_failure_trends(df):
     counts = daily_failures['count'].tolist()
     return {'dates': dates, 'failures': counts}
 
-def get_pareto_data(df):
-    if df is None:
-        return {'categories': [], 'counts': []}
-    
-    failure_counts = df[df['event_type'] == 'failure']['failure_type'].value_counts()
-    return {
-        'categories': failure_counts.index.tolist(),
-        'counts': failure_counts.values.tolist()
-    }
-
+# Builds detailed equipment history including failures, repairs, and status changes
 def get_equipment_details(df, equipment_id):
     if df is None:
         return None
@@ -128,7 +119,7 @@ def get_maintenance_data(df):
     if df is None:
         return []
     
-    # Filter for all repair/maintenance events in the CSV
+ # Extracts repair/maintenance events from CSV and formats them for UI
     maintenance = df[df['event_type'] == 'repair'].copy()
     maint_list = []
     
@@ -238,6 +229,7 @@ def api_failure_analysis():
     
     return jsonify(sorted(analysis, key=lambda x: x['count'], reverse=True))
 
+# API endpoint to schedule maintenance and append the new record into the CSV file
 @app.route('/api/schedule', methods=['POST'])
 def schedule_maintenance():
     try:

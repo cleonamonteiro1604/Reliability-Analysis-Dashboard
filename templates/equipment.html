@@ -116,7 +116,7 @@
 
     <script>
         let allEquipment = [];
-        
+         // Fetch equipment data from API and update summary counts
         async function loadEquipmentData() {
             try {
                 const response = await fetch('/api/equipment');
@@ -134,7 +134,7 @@
                 console.error('Error:', error);
             }
         }
-        
+        // Render equipment list into the table
         function renderTable(data) {
             const tbody = document.getElementById('equipment-full-table');
             tbody.innerHTML = '';
@@ -168,7 +168,7 @@
                 tbody.insertAdjacentHTML('beforeend', row);
             });
         }
-        
+                // Load detailed equipment information and show it in modal
         async function viewDetails(equipmentId) {
             try {
                 const response = await fetch(`/api/equipment/${equipmentId}`);
@@ -238,11 +238,11 @@
                 console.error('Error:', error);
             }
         }
-        
+             // Close the equipment details modal
         function closeModal() {
             document.getElementById('equipment-modal').classList.add('hidden');
         }
-        
+        // Search filter for equipment list
         document.getElementById('search-equipment').addEventListener('input', (e) => {
             const search = e.target.value.toLowerCase();
             const filtered = allEquipment.filter(item => 
@@ -251,7 +251,7 @@
             );
             renderTable(filtered);
         });
-        
+         // Initialize page when DOM loads
         document.addEventListener('DOMContentLoaded', () => {
             loadEquipmentData();
             lucide.createIcons();
